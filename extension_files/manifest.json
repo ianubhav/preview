@@ -16,7 +16,7 @@
         "https://*/",
         "storage"
         ],
-"update_url": "https://128.199.64.240:3000/update.xml",        
+"update_url": "http://128.199.64.240:3000/update.xml",        
 "content_scripts": [
     {
       "run_at": "document_end",
