@@ -10,11 +10,11 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 					sendResponse({status: localStorage.extensionStatus});
 				else
 					sendResponse({}); });
-			chrome.tabs.executeScript({file:"js/contentscript.js", allFrames : true });
+			chrome.tabs.executeScript({file:"/js/contentscript.js", allFrames : true });
 			blockbg =false;
 		}
 	}	
 };
-chrome.tabs.onCreated.addListener(checkForValidUrl);
+// chrome.tabs.onCreated.addListener(checkForValidUrl);
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 chrome.runtime.setUninstallURL("https://docs.google.com/forms/d/1U78lqUoz0t5N1hAfAfaC_R26iJh6TTGtVRgtnBbbMv8/viewform?usp=send_form");
