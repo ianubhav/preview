@@ -10,7 +10,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 					sendResponse({status: localStorage.extensionStatus});
 				else
 					sendResponse({}); });
-			chrome.tabs.executeScript({file:"contentscript.js", allFrames : true });
+			chrome.tabs.executeScript({file:"js/contentscript.js", allFrames : true });
 			blockbg =false;
 		}
 	}	
