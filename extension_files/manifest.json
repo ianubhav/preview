@@ -16,7 +16,6 @@
         "https://*/",
         "storage"
         ],
-"update_url": "http://128.199.64.240:3000/update.xml",        
 "content_scripts": [
     {
       "run_at": "document_end",
@@ -30,11 +29,11 @@
   "background": {
     "scripts": ["js/background.js"]
 },
-  "web_accessible_resources": ["script.js","jquery.min.js"],
+  "web_accessible_resources": ["js/script.js","js/jquery.min.js"],
   "page_action": {
       "default_name": "Preview",
       "default_icon": "icons/action_icon.png",
-      "default_popup": "icons/popup.html"
+      "default_popup": "popup.html"
       
   },
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"

@@ -1,11 +1,11 @@
 function myMain () {
 	var t = document.createElement('script');
-	t.src = chrome.extension.getURL('jquery.min.js');
+	t.src = chrome.extension.getURL('js/jquery.min.js');
 	(document.head||document.documentElement).appendChild(t);
 	t.onload = function() {
 		t.parentNode.removeChild(t);
 		var s = document.createElement('script');
-		s.src = chrome.extension.getURL('script.js');
+		s.src = chrome.extension.getURL('js/script.js');
 		(document.head||document.documentElement).appendChild(s);
 		s.onload = function() {
 			s.parentNode.removeChild(s);

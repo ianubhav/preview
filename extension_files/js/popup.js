@@ -6,6 +6,7 @@ $(document).on('change', 'input[type=radio][name=optradio]', function () {
         console.log(value);
         save_options(value);
          ga('send', 'event', value, 'click' );
+         $('#fadeout').show().delay(200).fadeOut(1000);
 });
 function save_options(value) {
   localStorage.extensionStatus = value;
@@ -21,3 +22,5 @@ function restore_options() {
 document.addEventListener('DOMContentLoaded', restore_options);
 
  ga('send', 'event', 'img', 'mouseenter' );
+
+$('#fadeout').hide();

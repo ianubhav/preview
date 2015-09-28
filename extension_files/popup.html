@@ -2,27 +2,36 @@
 <html>
 <head>
 	<title>Popup</title>
-	<link rel="stylesheet" href="bootstrap.min.css">
-	<link href="popup.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link href="css/popup.css" rel="stylesheet">
+	<link href="css/font-awesome.css" rel="stylesheet">
 </head>
 <body>
-<div id="div_container">
-<label class="radio-inline">
-      <input type="radio" name="optradio" checked="true" value="enabled" id ="rad_enabled" >Enabled
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="optradio" value = "disabled" id ="rad_disabled">Disabled
-    </label>
+<div class = "logo">
+	
+</div>
+<h5>Current Status</h5>
+<div id="container">
+	<div id="div_container">
+		<label class="radio-inline">
+		      <input type="radio" name="optradio" checked="true" value="enabled" id ="rad_enabled" >Enabled
+		    </label>
+		    <label class="radio-inline">
+		      <input type="radio" name="optradio" value = "disabled" id ="rad_disabled">Disabled
+		</label>
+	</div>
+	<h4 id="fadeout">Please reload page to see changes</h4>
+</div>
+<div id="footer">
+	<hr>
+	<ul class="social-icons">
+	<li><a href="https://github.com/TheGelato/preview" class="social-icon"> <i class="fa fa-github fa-2x"></i></a></li>
+	<li><a href="mailto:agarwal.anubhav@iitrpr.ac.in" class="social-icon"> <i class="fa fa-envelope fa-2x"></i></a></li>
+</ul>
 </div>
 
-
-
-
-
-
-</body>
-<script src="jquery.min.js"></script>
-<script src='analytics.js'></script>
-<script src="popup.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src='js/analytics.js'></script>
+<script src="js/popup.js"></script>
 
 </html>

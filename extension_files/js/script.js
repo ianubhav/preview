@@ -1,100 +1,249 @@
-function getIdFromUrl(e) {
-    return values = e.split("/"), id = values[4], id
+initialCall();
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)
+    [0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-68124588-1', 'auto') ; 
+
+
+var str;
+function getIdFromUrl(url){
+	values=url.split('/');
+	id = values[4];
+	return id;
+}
+function stopAnimating(){
+	$(".previewCanvas").remove();
+	block =false;
+	keepGoing = false;
+	iCount=0;
+}
+function getUrlAndLength(str){
+	// var scriptFile = eval(str);
+	// var url = ytplayer.config.args.storyboard_spec;
+	// var length = ytplayer.config.args.length_seconds;
+	var url="";
+	var length="";
+	var start = str.indexOf("storyboard_spec");
+	var lenStart = str.indexOf("length_seconds");
+	var tempStr = str[start+18];
+	var tt =0
+	while(tempStr!="\""){
+		url=url+tempStr;
+		tt=tt+1;
+		tempStr = str[start+18+tt];
+	}
+	tt=0;
+	tempStr = str[lenStart+17];
+	while(tempStr!="\""){
+		length=length+tempStr;
+		tt=tt+1;
+		tempStr = str[lenStart+17+tt];
+	}
+	return [url, parseInt(length)];  
+}
+function getImgsFromSource(html,id){
+	var imgs = [];
+	var parser = new DOMParser();
+	var doc = parser.parseFromString(html, "text/html");   
+	str = doc.getElementsByTagName("script")[10].innerHTML;
+	var urlAndLength = getUrlAndLength(str); 
+	var length = urlAndLength[1];
+	b = urlAndLength[0].split("|");
+	base = "https://i.ytimg.com/sb/"+id+"/storyboard3_L2/M";
+	c = b[3].split("#");
+	sigh = c[c.length - 1];
+	var n;
+	i=0;
+	if (length<60)
+		n=1;
+	else if (length < 60*20 & length>60 )
+		n=3;
+	else{
+		n = Math.floor(length / (60 * 4));
+		i=1;
+	}
+	
+	j=Math.floor(n/3)+1;
+	while(i<n){
+		imgs.push(base + i + ".jpg?sigh=" + sigh);
+		i+=j;
+	}
+	return imgs;
 }
 
-function stopAnimating() {
-    block = !1, document.contains(document.getElementById("previewCanvas")) && document.getElementById("previewCanvas").remove(), keepGoing = !1, iCount = 0
+function preloadImages(srcs,child,fn) {
+	var imgs = [], img;
+	var remaining = srcs.length;
+	for (var i = 0; i < srcs.length; i++) {
+		img = new Image();
+		img.onerror=function(){
+			--remaining;
+			if (remaining == 0) {
+				fn(srcs,child);
+			}
+		}	
+		img.onload = function() {
+			imgs.push(img);
+			--remaining;
+			if (remaining == 0) {
+				fn(srcs,child);
+			}
+		};
+		img.src = srcs[i];
+	}
+	return(imgs);
 }
 
-function getUrlAndLength(e) {
-    for (var t = "", n = "", i = e.indexOf("storyboard_spec"), r = e.indexOf("length_seconds"), o = e[i + 18], a = 0;
-        '"' != o;) t += o, a += 1, o = e[i + 18 + a];
-    for (a = 0, o = e[r + 17];
-        '"' != o;) n += o, a += 1, o = e[r + 17 + a];
-    return [t, parseInt(n)]
+var iCount=0;
+var keepGoing=true;
+var block = false;
+function initialCall(){
+
+	$(document).on( "mouseenter", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function(){
+        ga('send', 'event', 'img', 'mouseenter' );
+        $(".previewCanvas").remove();	
+			if(!block){
+
+				block = true;
+				keepGoing=true;
+				child = $(this).children( "img[src*='ytimg.com']" );
+				if((child.attr("src") !== undefined)&&(child.attr("src").indexOf("vi")>-1)&&(child.attr("src").indexOf("poster_wide")==-1)){
+				url = child.attr("src");
+				id = getIdFromUrl(url);
+				urlForSource = 'https://www.youtube.com/watch?v='+id;
+				$.ajax({
+					url : urlForSource,
+					async: true,
+					success: function(html) {
+						imgArray = getImgsFromSource(html,id);
+						var loadedImgs = preloadImages(imgArray,child,animate);
+						block = false;
+						keepGoing=true;
+					},
+					error: function(xhr, textStatus, errorThrown){
+     					block = false;
+    				}		
+				});
+			}
+			else{
+				stopAnimating();
+			}
+			} 
+});
+
+$(document).on( "mouseleave", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function(){
+	ga('send', 'event', 'img', 'mouseleave' );
+	stopAnimating();
+});
+
 }
 
-function getImgsFromSource(e, t) {
-    var n = [],
-        r = new DOMParser,
-        o = r.parseFromString(e, "text/html");
-    if (str = o.getElementsByTagName("script")[10].innerHTML, str.indexOf("length_seconds") < 0) return stopAnimating(), n;
-    var a = getUrlAndLength(str),
-        s = a[1];
-    b = a[0].split("|"), base = "https://i.ytimg.com/sb/" + t + "/storyboard3_L2/M", c = b[3].split("#"), sigh = c[c.length - 1];
-    var m;
-    for (i = 0, 60 > s ? m = 1 : 1200 > s & s > 60 ? m = 3 : (m = Math.floor(s / 240), i = 1), j = Math.floor(m / 3) + 1; i < m;) n.push(base + i + ".jpg?sigh=" + sigh), i += j;
-    return n
+function animate(array,child){
+	var width = child.attr("width");
+	var	height = child.attr("height");
+	var coin,
+coinImage,
+canvas;					
+
+function gameLoop () {
+	if(keepGoing){
+		window.requestAnimationFrame(gameLoop);
+		coin.update();
+		coin.render();
+	}
 }
 
-function preloadImages(e, t, n) {
-    for (var i, r = [], o = e.length, a = 0; a < e.length; a++) i = new Image, i.onerror = function() {
-        --o, 0 == o && n(e, t)
-    }, i.onload = function() {
-        r.push(i), --o, 0 == o && n(e, t)
-    }, i.src = e[a];
-    return r
+
+function sprite (options) {
+
+	var that = {},
+	frameIndex = 0,
+	heightIndex = 0,
+	tickCount = 0,
+	ticksPerFrame = options.ticksPerFrame || 0,
+	numberOfFrames = options.numberOfFrames || 1
+	numberOfHeight = options.numberOfHeight|| 1;
+
+	that.context = options.context;
+	that.width = options.width;
+	that.height = options.height;
+	that.image = options.image;
+
+	that.update = function () {
+		tickCount += 1;
+if (tickCount > ticksPerFrame) {
+
+	tickCount = 0;
+
+if (frameIndex < numberOfFrames - 1) {	
+frameIndex += 2;
+} else {
+	heightIndex += 2;
+	frameIndex = 0;
+}
+if (heightIndex>numberOfHeight - 1){
+	heightIndex = 0;
+	iCount+=1;
+	if(iCount>=array.length)
+	{
+
+		keepGoing = false;
+		block = false;
+		$(".previewCanvas").remove();
+	}
+	coinImage.src = array[iCount%array.length];
+	ticksPerFrame +=30;
 }
 
-function initialCall() {
-    $(document).on("mouseenter", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function() {
-        ga("send", "event", "img", "mouseenter"), block || (block = !0, keepGoing = !0, child = $(this).children("img[src*='ytimg.com']"), void 0 !== child.attr("src") && child.attr("src").indexOf("vi") > -1 && -1 == child.attr("src").indexOf("poster_wide") ? (url = child.attr("src"), id = getIdFromUrl(url), urlForSource = "https://www.youtube.com/watch?v=" + id, $.ajax({
-            url: urlForSource,
-            async: !0,
-            success: function(e) {
-                if (imgArray = getImgsFromSource(e, id), 0 != imgArray.length) {
-                    preloadImages(imgArray, child, animate)
-                }
-                block = !1, keepGoing = !0
-            },
-            error: function() {
-                block = !1
-            }
-        })) : stopAnimating())
-    }), $(document).on("mouseleave", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function() {
-        ga("send", "event", "img", "mouseleave"), stopAnimating()
-    })
 }
+};
 
-function animate(e, t) {
-    function n() {
-        keepGoing && (window.requestAnimationFrame(n), r.update(), r.render())
-    }
-
-    function i(t) {
-        var n = {},
-            i = 0,
-            r = 0,
-            a = 0,
-            m = t.ticksPerFrame || 0,
-            u = t.numberOfFrames || 1;
-        return numberOfHeight = t.numberOfHeight || 1, n.context = t.context, n.width = t.width, n.height = t.height, n.image = t.image, n.update = function() {
-            a += 1, a > m && (a = 0, u - 1 > i ? i += 2 : (r += 2, i = 0), r > numberOfHeight - 1 && (r = 0, iCount += 1, iCount >= e.length && (keepGoing = !1, block = !1, document.contains(document.getElementById("previewCanvas")) && document.getElementById("previewCanvas").remove()), o.src = e[iCount % e.length], m += 30))
-        }, n.render = function() {
-            keepGoing && (n.context.clearRect(0, 0, n.width, n.height), n.context.drawImage(n.image, i * n.width / u, r * n.height / numberOfHeight, n.width / u, n.height / numberOfHeight, 0, 0, s, c))
-        }, n
-    }
-    var r, o, a, s = t.attr("width"),
-        c = t.attr("height"),
-        a = document.createElement("canvas");
-    a.id = "previewCanvas";
-    a.getContext("2d");
-    a.width = s, a.height = c, a.style.position = "absolute", a.style.top = 0, a.style.left = 0, $(t).parent().append(a), o = new Image, o.src = e[iCount], o.addEventListener("load", n), r = i({
-        context: a.getContext("2d"),
-        width: o.width,
-        height: o.height,
-        image: o,
-        numberOfFrames: 5,
-        numberOfHeight: 5,
-        ticksPerFrame: 30
-    })
+that.render = function () {
+	if(keepGoing){
+// Clear the canvas
+that.context.clearRect(0, 0, that.width, that.height);
+// Draw the animation
+that.context.drawImage(
+	that.image,
+	frameIndex *that.width /numberOfFrames,
+	heightIndex *that.height/ numberOfHeight,
+	that.width / numberOfFrames,
+	that.height/ numberOfHeight,
+	0,
+	0,
+	width,
+	height);
 }
-initialCall(),
-    function(e, t, n, i, r, o, a) {
-        e.GoogleAnalyticsObject = r, e[r] = e[r] || function() {
-            (e[r].q = e[r].q || []).push(arguments)
-        }, e[r].l = 1 * new Date, o = t.createElement(n), a = t.getElementsByTagName(n)[0], o.async = 1, o.src = i, a.parentNode.insertBefore(o, a)
-    }(window, document, "script", "//www.google-analytics.com/analytics.js", "ga"), ga("create", "UA-68124588-1", "auto");
-var str, iCount = 0,
-    keepGoing = !0,
-    block = !1;
+};
+return that;
+}
+var canvas = document.createElement('canvas');
+canvas.className = "previewCanvas";
+var c = canvas.getContext('2d');
+canvas.width = width;
+if(height==undefined)
+	height = 110;
+canvas.height = height;
+canvas.style.position = "absolute";
+canvas.style.top = 0;
+canvas.style.left = 0;
+$(child).parent().append(canvas);
+coinImage = new Image();	
+coinImage.src = array[iCount];
+coinImage.addEventListener("load", gameLoop);
+// Create sprite
+coin = sprite({
+	context: canvas.getContext("2d"),
+	width: coinImage.width,
+	height: coinImage.height,
+	image: coinImage,
+	numberOfFrames: 5,
+	numberOfHeight:5,
+	ticksPerFrame: 30
+});
+
+// Load sprite sheet
+}

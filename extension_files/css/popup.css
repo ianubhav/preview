@@ -1,6 +1,68 @@
  html, body {
-                width: 200px;
-                height: 300px;
-                margin: 10px;
-                padding: 0; 
+                width: 220px;
+                height: 200px;
+                
             }
+h4{
+	text-align: center;
+margin-top: 40px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+h5{
+	text-align: center;
+}
+#container { height: auto; min-height: 100%; }            
+#fadeout {
+    padding: 10px 0;
+    line-height: 20px;
+    background: #575757;
+    width: 200px;
+    height: 60px;
+    color: #fff;
+}
+
+.logo{
+	border-style: solid;
+    border-width: 1px;
+    height: 60px;
+    background: #444444
+}
+#div_container{
+	text-align:center;
+}
+ul {
+	padding:0;
+	list-style: none;
+	text-align: center;
+	
+}
+.social-icons li {
+	margin: 0px 0px 10px 10px;
+	vertical-align: top;
+	display: inline;
+}
+
+.social-icons a {
+	color: #fff; 
+	text-decoration: none;
+}
+
+
+.fa {
+	color: black;
+	background-color: #fff;
+}
+#footer {
+ clear: both;
+ position: relative;
+ z-index: 10;
+ height: 3em;
+ margin-top: -3em;
+}
+hr {
+    margin-bottom: 5px; 
+    border: 0;
+    border-top: 1px solid #eee;
+}
