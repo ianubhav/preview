@@ -1,11 +1,11 @@
 initialCall();
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)
-    [0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    ga('create', 'UA-68124588-1', 'auto') ; 
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)
+	[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-68124588-1', 'auto') ; 
 
 
 var str;
@@ -29,7 +29,7 @@ function getUrlAndLength(str){
 	var start = str.indexOf("storyboard_spec");
 	var lenStart = str.indexOf("length_seconds");
 	var tempStr = str[start+18];
-	var tt =0
+	var tt =0;
 	while(tempStr!="\""){
 		url=url+tempStr;
 		tt=tt+1;
@@ -49,6 +49,10 @@ function getImgsFromSource(html,id){
 	var parser = new DOMParser();
 	var doc = parser.parseFromString(html, "text/html");   
 	str = doc.getElementsByTagName("script")[10].innerHTML;
+	
+	if(str.indexOf("storyboard_spec")<0){
+		return imgs;
+	}
 	var urlAndLength = getUrlAndLength(str); 
 	var length = urlAndLength[1];
 	b = urlAndLength[0].split("|");
@@ -74,7 +78,7 @@ function getImgsFromSource(html,id){
 	return imgs;
 }
 
-function preloadImages(srcs,child,fn) {
+function preloadImages(srcs,child,canvas,fn) {
 	var imgs = [], img;
 	var remaining = srcs.length;
 	for (var i = 0; i < srcs.length; i++) {
@@ -82,14 +86,14 @@ function preloadImages(srcs,child,fn) {
 		img.onerror=function(){
 			--remaining;
 			if (remaining == 0) {
-				fn(srcs,child);
+				fn(srcs,child,canvas);
 			}
 		}	
 		img.onload = function() {
 			imgs.push(img);
 			--remaining;
 			if (remaining == 0) {
-				fn(srcs,child);
+				fn(srcs,child,canvas);
 			}
 		};
 		img.src = srcs[i];
@@ -103,14 +107,16 @@ var block = false;
 function initialCall(){
 
 	$(document).on( "mouseenter", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function(){
-        ga('send', 'event', 'img', 'mouseenter' );
-        $(".previewCanvas").remove();	
-			if(!block){
-
-				block = true;
-				keepGoing=true;
-				child = $(this).children( "img[src*='ytimg.com']" );
-				if((child.attr("src") !== undefined)&&(child.attr("src").indexOf("vi")>-1)&&(child.attr("src").indexOf("poster_wide")==-1)){
+		ga('send', 'event', 'img', 'mouseenter' );
+		$(".previewCanvas").remove();	
+		if(!block){
+			block = true;
+			keepGoing=true;
+			var canvas = document.createElement('canvas');
+			canvas.className = "previewCanvas";
+			var c = canvas.getContext('2d');
+			child = $(this).children( "img[src*='ytimg.com']" );
+			if((child.attr("src") !== undefined)&&(child.attr("src").indexOf("vi")>-1)&&(child.attr("src").indexOf("poster_wide")==-1)){
 				url = child.attr("src");
 				id = getIdFromUrl(url);
 				urlForSource = 'https://www.youtube.com/watch?v='+id;
@@ -119,90 +125,91 @@ function initialCall(){
 					async: true,
 					success: function(html) {
 						imgArray = getImgsFromSource(html,id);
-						var loadedImgs = preloadImages(imgArray,child,animate);
+						var loadedImgs = preloadImages(imgArray,child,canvas,animate);
 						block = false;
-						keepGoing=true;
+						// keepGoing=true;
 					},
 					error: function(xhr, textStatus, errorThrown){
-     					block = false;
-    				}		
+						block = false;
+					}		
 				});
 			}
 			else{
 				stopAnimating();
 			}
-			} 
-});
+		} 
+	});
 
-$(document).on( "mouseleave", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related", function(){
+$(document).on( "mouseleave", ".yt-thumb-simple,.yt-uix-simple-thumb-wrap,.yt-uix-simple-thumb-related",".previewCanvas", function(){
 	ga('send', 'event', 'img', 'mouseleave' );
 	stopAnimating();
 });
 
 }
 
-function animate(array,child){
+function animate(array,child,canvas){
 	var width = child.attr("width");
 	var	height = child.attr("height");
 	var coin,
-coinImage,
-canvas;					
-
-function gameLoop () {
-	if(keepGoing){
-		window.requestAnimationFrame(gameLoop);
-		coin.update();
-		coin.render();
+	coinImage;					
+	function gameLoop () {
+		if(keepGoing){
+			window.requestAnimationFrame(gameLoop);
+			coin.update();
+			coin.render();
+		}
+		else{
+			return;
+		}
 	}
-}
 
 
-function sprite (options) {
+	function sprite (options) {
 
-	var that = {},
-	frameIndex = 0,
-	heightIndex = 0,
-	tickCount = 0,
-	ticksPerFrame = options.ticksPerFrame || 0,
-	numberOfFrames = options.numberOfFrames || 1
-	numberOfHeight = options.numberOfHeight|| 1;
+		var that = {},
+		frameIndex = 0,
+		heightIndex = 1,
+		tickCount = 0,
+		ticksPerFrame = options.ticksPerFrame || 0,
+		numberOfFrames = options.numberOfFrames || 1
+		numberOfHeight = options.numberOfHeight|| 1;
 
-	that.context = options.context;
-	that.width = options.width;
-	that.height = options.height;
-	that.image = options.image;
+		that.context = options.context;
+		that.width = options.width;
+		that.height = options.height;
+		that.image = options.image;
 
-	that.update = function () {
-		tickCount += 1;
-if (tickCount > ticksPerFrame) {
+		that.update = function () {
+			tickCount += 1;
+			if (tickCount > ticksPerFrame) {
 
-	tickCount = 0;
+				tickCount = 0;
 
-if (frameIndex < numberOfFrames - 1) {	
-frameIndex += 2;
-} else {
-	heightIndex += 2;
-	frameIndex = 0;
-}
-if (heightIndex>numberOfHeight - 1){
-	heightIndex = 0;
-	iCount+=1;
-	if(iCount>=array.length)
-	{
+				if (frameIndex < numberOfFrames - 1) {	
+					frameIndex += 2;
+				} else {
+					heightIndex += 2;
+					frameIndex = 0;
+				}
+				if (heightIndex>numberOfHeight - 1){
+					heightIndex = 1;
+					iCount+=1;
+					if(iCount>=array.length)
+					{
 
-		keepGoing = false;
-		block = false;
-		$(".previewCanvas").remove();
-	}
-	coinImage.src = array[iCount%array.length];
-	ticksPerFrame +=30;
-}
+						keepGoing = false;
+						block = false;
+						$(".previewCanvas").remove();
+					}
+					coinImage.src = array[iCount%array.length];
+					ticksPerFrame +=30;
+				}
 
-}
-};
+			}
+		};
 
-that.render = function () {
-	if(keepGoing){
+		that.render = function () {
+			if(keepGoing){
 // Clear the canvas
 that.context.clearRect(0, 0, that.width, that.height);
 // Draw the animation
@@ -220,9 +227,6 @@ that.context.drawImage(
 };
 return that;
 }
-var canvas = document.createElement('canvas');
-canvas.className = "previewCanvas";
-var c = canvas.getContext('2d');
 canvas.width = width;
 if(height==undefined)
 	height = 110;

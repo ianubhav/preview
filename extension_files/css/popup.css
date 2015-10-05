@@ -23,12 +23,12 @@ h5{
     color: #fff;
 }
 
-.logo{
+/*.logo{
 	border-style: solid;
     border-width: 1px;
     height: 60px;
     background: #444444
-}
+}*/
 #div_container{
 	text-align:center;
 }
@@ -63,6 +63,7 @@ ul {
 }
 hr {
     margin-bottom: 5px; 
+    margin-top: 2px;
     border: 0;
     border-top: 1px solid #eee;
 }

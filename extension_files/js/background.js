@@ -1,9 +1,8 @@
 var blockbg = false;
-
 function checkForValidUrl(tabId, changeInfo, tab) {
-	if(!blockbg){
-		blockbg = true;
-		if (tab.url.indexOf('https://www.youtube.com') == 0 | tab.url.indexOf('youtube.com') > -1) {
+	if (tab.url.indexOf('https://www.youtube.com') == 0 | tab.url.indexOf('youtube.com') > -1) {
+		if(!blockbg){
+			blockbg = true;
 			chrome.pageAction.show(tabId);
 			chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 				if (request.method == "getStatus")
